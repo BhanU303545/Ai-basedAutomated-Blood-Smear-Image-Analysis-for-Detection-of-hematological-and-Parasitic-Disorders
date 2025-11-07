@@ -13,9 +13,34 @@ import uuid
 import torchvision.transforms as transforms
 import torchvision.models as models
 from dotenv import load_dotenv
+import urllib.request
+import sys
 
 # Load environment variables
 load_dotenv()
+
+def download_model_from_url(url, destination):
+    """Download model file from external URL if not present locally"""
+    try:
+        if os.path.exists(destination):
+            print(f"✓ Model file already exists at {destination}")
+            return True
+        
+        print(f"Downloading model from {url}...")
+        os.makedirs(os.path.dirname(destination), exist_ok=True)
+        
+        # Download with progress
+        def reporthook(count, block_size, total_size):
+            percent = int(count * block_size * 100 / total_size)
+            sys.stdout.write(f"\rDownloading: {percent}%")
+            sys.stdout.flush()
+        
+        urllib.request.urlretrieve(url, destination, reporthook)
+        print(f"\n✓ Model downloaded successfully to {destination}")
+        return True
+    except Exception as e:
+        print(f"✗ Error downloading model: {e}")
+        return False
 
 app = Flask(__name__)
 CORS(app)
@@ -83,7 +108,15 @@ def __init__(self, model_path=None):
         print(f"✗ Error loading model: {str(e)}")
         raise
 
-analyzer = BloodSmearAnalyzer('backend/models/best_model.pth')
+# Download model if not present (for deployment)
+MODEL_PATH = os.getenv('MODEL_PATH', 'backend/models/best_model.pth')
+MODEL_URL = os.getenv('MODEL_URL', '')
+
+if MODEL_URL and not os.path.exists(MODEL_PATH):
+    print("Model file not found locally. Attempting to download...")
+    download_model_from_url(MODEL_URL, MODEL_PATH)
+
+analyzer = BloodSmearAnalyzer(MODEL_PATH)
 
 @app.route('/api/register', methods=['POST'])
 def register():
