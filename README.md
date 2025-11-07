@@ -1,126 +1,137 @@
-# Blood Smear Analysis System
+# Blood Smear Analysis - MongoDB Backend Server
 
-Automated detection system for hematological and parasitic disorders using blood smear image analysis.
+This is the backend server for the Blood Smear Analysis application using MongoDB.
 
-## Features
+## Prerequisites
 
-- User authentication (registration and login)
-- Upload and analyze blood smear images
-- Live microscopic analysis using camera
-- Results history with filtering and search
-- Downloadable analysis reports
-- Dashboard with analytics and statistics
+1. **MongoDB** - Install MongoDB Community Edition
+   - Download from: https://www.mongodb.com/try/download/community
+   - Authenticated connection: `mongodb://bhanu:bhanu123@localhost:27017/bloodsmear?authSource=admin`
+   - Database: `bloodsmear`
 
-## Detectable Conditions
-
-- Malaria
-- Babesiosis
-- Trypanosomiasis
-- Leishmaniasis
-- Leukemia
-- Anemia
-- Sickle Cell Anemia
-- Thrombocytopenia
+2. **Node.js** - Install Node.js (v14 or higher)
+   - Download from: https://nodejs.org/
 
 ## Setup Instructions
 
-1. **Environment Variables**
+### 1. Install MongoDB
 
-Create a `.env` file in the root directory:
-
-```env
-MONGODB_URI=mongodb://localhost:27017/
-MONGODB_DB_NAME=blood_smear_analysis
+Connect to MongoDB using MongoDB Compass with:
+```
+mongodb://bhanu:bhanu123@localhost:27017/bloodsmear?authSource=admin
 ```
 
-2. **Install Dependencies**
+Make sure MongoDB is running on your system with authentication enabled.
+
+### 2. Install Dependencies
+
+Navigate to the server directory and install dependencies:
 
 ```bash
+cd server
 npm install
 ```
 
-3. **Database Setup**
-
-Start MongoDB and the database will automatically create the following collections:
-- `users` - User accounts and authentication
-- `analyses` - Analysis records
-- `results` - Analysis results and predictions
-
-See `MONGODB_CONNECTION_SETUP.md` for detailed setup instructions.
-
-4. **Start Backend Services**
+### 3. Start the Server
 
 ```bash
-# Terminal 1 - Python Backend
-cd backend
-python app.py
-
-# Terminal 2 - Node.js Server
-cd server
-node server.js
+npm start
 ```
 
-5. **Run Development Server**
+Or for development with auto-reload:
 
 ```bash
 npm run dev
 ```
 
-6. **Build for Production**
+The server will start on `http://localhost:5001`
 
-```bash
-npm run build
+### 4. Database Structure
+
+The application uses the following collections:
+
+- **users** - User accounts
+  - email
+  - password (hashed)
+  - full_name
+  - role
+  - created_at
+
+- **analyses** - Analysis records
+  - user_id
+  - image_data (base64)
+  - analysis_type (upload/live)
+  - status
+  - created_at
+
+- **results** - Analysis results
+  - analysis_id
+  - user_id
+  - predicted_disease
+  - confidence_score
+  - all_predictions
+  - notes
+  - created_at
+
+## API Endpoints
+
+### Authentication
+
+- `POST /api/register` - Register new user
+- `POST /api/login` - Login user
+
+### Analysis
+
+- `POST /api/analyze` - Analyze blood smear image
+- `GET /api/results?user_id={userId}` - Get user's results
+- `GET /api/stats/{userId}` - Get user statistics
+- `DELETE /api/results/{resultId}` - Delete a result
+
+## Configuration
+
+You can modify the following in `server.js`:
+
+- `PORT` - Server port (default: 5001)
+- `MONGODB_URI` - MongoDB connection string (default: mongodb://bhanu:bhanu123@localhost:27017/bloodsmear?authSource=admin)
+- `DB_NAME` - Database name (default: bloodsmear)
+
+## Testing
+
+You can test the API using:
+- Postman
+- cURL
+- The frontend application
+
+## Integration with ML Model
+
+The `/api/analyze` endpoint currently returns mock data. To integrate your ML model:
+
+1. Install your ML model dependencies (TensorFlow.js, ONNX, etc.)
+2. Load your model in the server
+3. Replace the mock predictions in the analyze endpoint with actual model predictions
+
+Example:
+```javascript
+// Load your model
+const model = await loadModel();
+
+// In the analyze endpoint
+const predictions = await model.predict(imageData);
 ```
 
-## Project Structure
+## Troubleshooting
 
-```
-project/
-├── index.html              # Login/Register page
-├── dashboard.html          # Dashboard with analytics
-├── analyze.html            # Image upload and analysis
-├── live.html              # Live microscopic analysis
-├── results.html           # Results history
-├── styles/
-│   └── main.css           # All styling
-├── js/
-│   ├── auth.js            # Authentication logic
-│   ├── api.js             # API client
-│   ├── dashboard.js       # Dashboard functionality
-│   ├── analyze.js         # Image analysis logic
-│   ├── live.js            # Live camera analysis
-│   └── results.js         # Results management
-├── backend/
-│   └── app.py             # Python Flask ML backend
-└── server/
-    └── server.js          # Node.js Express server
-```
+### MongoDB Connection Issues
 
-## Usage
+If you can't connect to MongoDB:
+1. Make sure MongoDB service is running
+2. Check the connection string matches your MongoDB setup
+3. Verify the port (default: 27017)
 
-1. **Register/Login**: Create an account or sign in
-2. **Upload Analysis**: Go to "Image Analysis" to upload blood smear images
-3. **Live Analysis**: Use "Live Microscopy" for real-time camera analysis
-4. **View Results**: Check "Results History" for all past analyses
-5. **Dashboard**: Monitor statistics and trends
+### Port Already in Use
 
-## Technology Stack
+If port 5001 is already in use, change the PORT variable in server.js
 
-- **Frontend**: HTML, CSS, JavaScript (Vanilla)
-- **Backend**: 
-  - Python Flask (ML inference)
-  - Node.js Express (API server)
-- **Database**: MongoDB
-- **ML Framework**: PyTorch (EfficientNet-B0)
-- **Bundler**: Vite
+### CORS Issues
 
-## Model Reference
-
-The system uses the `best_model.pth` (EfficientNet-B0) model for disease prediction. The model is loaded in the Python Flask backend for inference.
-
-## Security
-
-- Password hashing with bcrypt
-- User authentication with session management
-- Users can only access their own data
-- Secure API endpoints with validation
+The server is configured to allow all origins. For production, update the CORS configuration to only allow your frontend domain.

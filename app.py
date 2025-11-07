@@ -67,7 +67,7 @@ def __init__(self, model_path=None):
     self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     # Get model path from environment or use default
-    model_path = model_path or os.getenv('MODEL_PATH', 'backend/models/best_model.pth')
+    model_path = model_path or os.getenv('MODEL_PATH', 'best_model.pth')
     
     try:
         # Load model checkpoint
@@ -109,7 +109,7 @@ def __init__(self, model_path=None):
         raise
 
 # Download model if not present (for deployment)
-MODEL_PATH = os.getenv('MODEL_PATH', 'backend/models/best_model.pth')
+MODEL_PATH = os.getenv('MODEL_PATH', 'best_model.pth')
 MODEL_URL = os.getenv('MODEL_URL', '')
 
 if MODEL_URL and not os.path.exists(MODEL_PATH):
@@ -286,7 +286,7 @@ def health_check():
         }), 500
 
 if __name__ == '__main__':
-    model_path = 'backend/models/best_model.pth'
+    model_path = 'best_model.pth'
     if not os.path.exists(model_path):
         print(f"Warning: Model file '{model_path}' not found")
     

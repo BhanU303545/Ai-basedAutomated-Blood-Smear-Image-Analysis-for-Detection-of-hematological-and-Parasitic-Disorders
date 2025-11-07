@@ -8,7 +8,7 @@ import torchvision.transforms as transforms
 from torchvision import models
 
 # Model configuration
-MODEL_PATH = '../backend/models/best_model.pth'
+MODEL_PATH = 'best_model.pth'
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Class names will be loaded from checkpoint

@@ -9,7 +9,7 @@ const app = express();
 const PORT = 5001;
 
 // Model configuration
-const MODEL_PATH = path.join(__dirname, '..', 'backend', 'models', 'best_model.pth');
+const MODEL_PATH = path.join(__dirname, 'best_model.pth');
 const MODEL_NAME = 'best_model.pth';
 
 // MongoDB connection (Authenticated)
