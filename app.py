@@ -62,51 +62,97 @@ except Exception as e:
     print(f"✗ MongoDB connection error: {e}")
     print("Application will start but database operations will fail.")
 
-def __init__(self, model_path=None):
-    # Use environment variable if no path provided
-    self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+class BloodSmearAnalyzer:
+    def __init__(self, model_path=None):
+        # Use environment variable if no path provided
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        
+        # Get model path from environment or use default
+        model_path = model_path or os.getenv('MODEL_PATH', 'best_model.pth')
+        
+        try:
+            # Load model checkpoint
+            checkpoint = torch.load(model_path, map_location=self.device)
+            self.class_names = checkpoint['class_names']
+            
+            # Initialize model architecture
+            self.model = models.efficientnet_b0(pretrained=False)
+            in_features = self.model.classifier[1].in_features
+            
+            # Define custom classifier
+            self.model.classifier = nn.Sequential(
+                nn.Dropout(0.3),
+                nn.Linear(in_features, 512),
+                nn.ReLU(),
+                nn.BatchNorm1d(512),
+                nn.Dropout(0.2),
+                nn.Linear(512, len(self.class_names))
+            )
+            
+            # Load model weights
+            self.model.load_state_dict(checkpoint['model_state_dict'])
+            self.model.to(self.device)
+            self.model.eval()
+            
+            # Image transformations
+            self.transform = transforms.Compose([
+                transforms.Resize((224, 224)),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.485, 0.456, 0.406], 
+                                   std=[0.229, 0.224, 0.225])
+            ])
+            
+            print(f"✓ Model loaded successfully from {model_path}")
+            print(f"✓ Using device: {self.device}")
+            
+        except Exception as e:
+            print(f"✗ Error loading model: {str(e)}")
+            raise
     
-    # Get model path from environment or use default
-    model_path = model_path or os.getenv('MODEL_PATH', 'best_model.pth')
-    
-    try:
-        # Load model checkpoint
-        checkpoint = torch.load(model_path, map_location=self.device)
-        self.class_names = checkpoint['class_names']
-        
-        # Initialize model architecture
-        self.model = models.efficientnet_b0(pretrained=False)
-        in_features = self.model.classifier[1].in_features
-        
-        # Define custom classifier
-        self.model.classifier = nn.Sequential(
-            nn.Dropout(0.3),
-            nn.Linear(in_features, 512),
-            nn.ReLU(),
-            nn.BatchNorm1d(512),
-            nn.Dropout(0.2),
-            nn.Linear(512, len(self.class_names))
-        )
-        
-        # Load model weights
-        self.model.load_state_dict(checkpoint['model_state_dict'])
-        self.model.to(self.device)
-        self.model.eval()
-        
-        # Image transformations
-        self.transform = transforms.Compose([
-            transforms.Resize((224, 224)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], 
-                               std=[0.229, 0.224, 0.225])
-        ])
-        
-        print(f"✓ Model loaded successfully from {model_path}")
-        print(f"✓ Using device: {self.device}")
-        
-    except Exception as e:
-        print(f"✗ Error loading model: {str(e)}")
-        raise
+    def predict(self, image_data):
+        """Predict disease from base64 encoded image"""
+        try:
+            # Remove data URL prefix if present
+            if ',' in image_data:
+                image_data = image_data.split(',')[1]
+            
+            # Decode base64 to image
+            image_bytes = base64.b64decode(image_data)
+            image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
+            
+            # Apply transformations
+            image_tensor = self.transform(image).unsqueeze(0).to(self.device)
+            
+            # Make prediction
+            with torch.no_grad():
+                outputs = self.model(image_tensor)
+                probabilities = F.softmax(outputs, dim=1)
+            
+            # Get all predictions
+            probs = probabilities[0].cpu().numpy()
+            predictions = []
+            
+            for idx, prob in enumerate(probs):
+                predictions.append({
+                    'disease': self.class_names[idx],
+                    'confidence': float(prob * 100)
+                })
+            
+            # Sort by confidence
+            predictions.sort(key=lambda x: x['confidence'], reverse=True)
+            
+            return {
+                'status': 'success',
+                'predicted_disease': predictions[0]['disease'],
+                'confidence': predictions[0]['confidence'],
+                'all_predictions': predictions
+            }
+            
+        except Exception as e:
+            return {
+                'status': 'error',
+                'error': str(e)
+            }
 
 # Download model if not present (for deployment)
 MODEL_PATH = os.getenv('MODEL_PATH', 'best_model.pth')
