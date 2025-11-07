@@ -12,31 +12,48 @@ import os
 import uuid
 import torchvision.transforms as transforms
 import torchvision.models as models
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app)
 
-# MongoDB Configuration (Authenticated)
-MONGO_URI = 'mongodb://bhanu:bhanu123@localhost:27017/bloodsmear?authSource=admin'
-DB_NAME = 'bloodsmear'
+# MongoDB Configuration from environment variables
+MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/bloodsmear')
+DB_NAME = os.getenv('DB_NAME', 'bloodsmear')
 
 # Connect to MongoDB
-client = MongoClient(MONGO_URI)
-db = client[DB_NAME]
-users_collection = db['users']
-analyses_collection = db['analyses']
+try:
+    client = MongoClient(MONGO_URI)
+    db = client[DB_NAME]
+    users_collection = db['users']
+    analyses_collection = db['analyses']
+    # Test connection
+    client.server_info()
+    print(f"✓ Connected to MongoDB: {DB_NAME}")
+except Exception as e:
+    print(f"✗ MongoDB connection error: {e}")
+    print("Application will start but database operations will fail.")
 
-print(f"Connected to MongoDB: {DB_NAME}")
-
-class BloodSmearAnalyzer:
-    def __init__(self, model_path='models/best_model.pth'):
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        
+def __init__(self, model_path=None):
+    # Use environment variable if no path provided
+    self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    
+    # Get model path from environment or use default
+    model_path = model_path or os.getenv('MODEL_PATH', 'backend/models/best_model.pth')
+    
+    try:
+        # Load model checkpoint
         checkpoint = torch.load(model_path, map_location=self.device)
         self.class_names = checkpoint['class_names']
         
-        self.model = models.efficientnet_b0()
+        # Initialize model architecture
+        self.model = models.efficientnet_b0(pretrained=False)
         in_features = self.model.classifier[1].in_features
+        
+        # Define custom classifier
         self.model.classifier = nn.Sequential(
             nn.Dropout(0.3),
             nn.Linear(in_features, 512),
@@ -46,52 +63,25 @@ class BloodSmearAnalyzer:
             nn.Linear(512, len(self.class_names))
         )
         
+        # Load model weights
         self.model.load_state_dict(checkpoint['model_state_dict'])
         self.model.to(self.device)
         self.model.eval()
         
+        # Image transformations
         self.transform = transforms.Compose([
             transforms.Resize((224, 224)),
             transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], 
+                               std=[0.229, 0.224, 0.225])
         ])
         
-        print(f"Model loaded: {checkpoint['val_acc']:.2f}% accuracy")
-    
-    def predict(self, image_data):
-        try:
-            if ',' in image_data:
-                image_data = image_data.split(',')[1]
-            
-            image = Image.open(io.BytesIO(base64.b64decode(image_data))).convert('RGB')
-            
-            inputs = self.transform(image).unsqueeze(0)
-            inputs = inputs.to(self.device)
-            
-            with torch.no_grad():
-                outputs = self.model(inputs)
-                probabilities = torch.nn.functional.softmax(outputs, dim=1)
-                confidence, predicted_idx = torch.max(probabilities, 1)
-            
-            predicted_class = self.class_names[predicted_idx.item()]
-            confidence_score = confidence.item()
-            
-            all_probs = probabilities[0].cpu().numpy()
-            predictions = [
-                {'disease': self.class_names[i], 'confidence': float(all_probs[i])}
-                for i in range(len(self.class_names))
-            ]
-            predictions.sort(key=lambda x: x['confidence'], reverse=True)
-            
-            return {
-                'predicted_class': predicted_class,
-                'confidence': confidence_score,
-                'all_predictions': predictions,
-                'status': 'success'
-            }
-            
-        except Exception as e:
-            return {'error': str(e), 'status': 'error'}
+        print(f"✓ Model loaded successfully from {model_path}")
+        print(f"✓ Using device: {self.device}")
+        
+    except Exception as e:
+        print(f"✗ Error loading model: {str(e)}")
+        raise
 
 analyzer = BloodSmearAnalyzer('backend/models/best_model.pth')
 

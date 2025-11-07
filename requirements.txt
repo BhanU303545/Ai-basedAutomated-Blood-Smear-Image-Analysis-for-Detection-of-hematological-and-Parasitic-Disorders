@@ -1,9 +1,22 @@
-torch
-torchvision
-transformers
-flask
-flask-cors
-pymongo
-pillow
-numpy
-gunicorn
+# PyTorch CPU version (optimized for Render deployment)
+--index-url https://download.pytorch.org/whl/cpu
+torch==2.0.1+cpu
+torchvision==0.15.2+cpu
+
+# Web Framework
+flask==2.3.3
+flask-cors==4.0.0
+gunicorn==21.2.0
+
+# Database
+pymongo==4.5.0
+
+# Image Processing
+pillow==10.0.0
+
+# ML/Data Science
+numpy==1.24.3
+transformers==4.33.0
+
+# Additional dependencies
+python-dotenv==1.0.0
