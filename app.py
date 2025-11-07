@@ -263,11 +263,14 @@ def health_check():
         }), 500
 
 if __name__ == '__main__':
-    model_path = 'models/best_model.pth'
+    model_path = 'backend/models/best_model.pth'
     if not os.path.exists(model_path):
         print(f"Warning: Model file '{model_path}' not found")
     
     print(f"Using device: {analyzer.device}")
-    print("Starting Flask server on http://0.0.0.0:5001")
     
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    # Use dynamic port for Render deployment
+    port = int(os.environ.get("PORT", 5000))
+    print(f"Starting Flask server on http://0.0.0.0:{port}")
+    
+    app.run(host='0.0.0.0', port=port, debug=False)
