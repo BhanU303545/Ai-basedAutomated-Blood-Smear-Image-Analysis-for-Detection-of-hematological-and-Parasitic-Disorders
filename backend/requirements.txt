@@ -1,0 +1,8 @@
+torch
+torchvision
+transformers
+flask
+flask-cors
+pymongo
+pillow
+numpy

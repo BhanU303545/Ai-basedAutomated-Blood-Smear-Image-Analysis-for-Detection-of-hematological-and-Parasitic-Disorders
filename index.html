@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blood Smear Analysis - Login</title>
+    <link rel="stylesheet" href="/styles/main.css">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="logo-section">
+                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                        <path d="M2 17l10 5 10-5"/>
+                        <path d="M2 12l10 5 10-5"/>
+                    </svg>
+                    <h1>Blood Smear Analysis</h1>
+                </div>
+                <p class="subtitle">Automated Detection of Hematological and Parasitic Disorders</p>
+            </div>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Login</button>
+                <button class="auth-tab" data-tab="register">Register</button>
+            </div>
+
+            <form id="loginForm" class="auth-form active">
+                <div class="form-group">
+                    <label for="loginEmail">Email Address</label>
+                    <input type="email" id="loginEmail" required placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required placeholder="Enter your password">
+                </div>
+                <div class="form-message" id="loginMessage"></div>
+                <button type="submit" class="btn btn-primary" id="loginBtn">
+                    <span class="btn-text">Sign In</span>
+                    <span class="btn-loader"></span>
+                </button>
+            </form>
+
+            <form id="registerForm" class="auth-form">
+                <div class="form-group">
+                    <label for="registerName">Full Name</label>
+                    <input type="text" id="registerName" required placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email Address</label>
+                    <input type="email" id="registerEmail" required placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" required placeholder="Create a password (min 6 characters)">
+                </div>
+                <div class="form-group">
+                    <label for="registerRole">Role</label>
+                    <select id="registerRole" required>
+                        <option value="technician">Technician</option>
+                        <option value="doctor">Doctor</option>
+                        <option value="admin">Administrator</option>
+                    </select>
+                </div>
+                <div class="form-message" id="registerMessage"></div>
+                <button type="submit" class="btn btn-primary" id="registerBtn">
+                    <span class="btn-text">Create Account</span>
+                    <span class="btn-loader"></span>
+                </button>
+            </form>
+
+            <div class="diseases-info">
+                <p class="info-title">Detectable Conditions:</p>
+                <div class="disease-tags">
+                    <span class="disease-tag">Babesia</span>
+                    <span class="disease-tag">Leishmania</span>
+                    <span class="disease-tag">Trypanosome</span>
+                    <span class="disease-tag">Basophil</span>
+                    <span class="disease-tag">Eosinophil</span>
+                    <span class="disease-tag">Lymphocyte</span>
+                    <span class="disease-tag">Malaria (Parasitized)</span>
+                    <span class="disease-tag">Malaria (Uninfected)</span>
+                    <span class="disease-tag">Monocyte</span>
+                    <span class="disease-tag">Neutrophil</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="/js/auth.js"></script>
+</body>
+</html>
