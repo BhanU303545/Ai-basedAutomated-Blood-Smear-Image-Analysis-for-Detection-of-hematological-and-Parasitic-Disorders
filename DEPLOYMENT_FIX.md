@@ -30,11 +30,13 @@
 ```
 flask==3.0.0 (was 2.3.3)
 pillow==10.4.0 (was 10.0.0) ✓ Python 3.11 compatible
-numpy==1.26.4 (was 1.24.3)
+numpy>=1.24.0,<2.0.0 (was 1.24.3) - flexible version range
 transformers==4.44.0 (was 4.33.0)
-torch==2.1.0+cpu (was 2.0.1+cpu)
-torchvision==0.16.0+cpu (was 0.15.2+cpu)
+torch==2.5.1 (was 2.0.1+cpu) - latest stable version
+torchvision==0.20.1 (was 0.15.2+cpu) - latest stable version
 ```
+
+**Note:** Removed `+cpu` suffix and `--extra-index-url` as PyTorch 2.5.1+ is available directly from PyPI and automatically uses CPU-only builds on CPU systems.
 
 ### `runtime.txt`
 ```

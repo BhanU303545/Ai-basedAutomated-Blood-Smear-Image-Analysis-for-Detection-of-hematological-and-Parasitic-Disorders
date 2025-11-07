@@ -10,14 +10,12 @@ pymongo==4.5.0
 pillow==10.4.0
 
 # ML/Data Science
-numpy==1.26.4
+numpy>=1.24.0,<2.0.0
 transformers==4.44.0
 
 # Additional dependencies
 python-dotenv==1.0.0
 
-# PyTorch CPU version (optimized for Render deployment)
-# Use extra-index-url to keep access to both PyPI and PyTorch repos
---extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.1.0+cpu
-torchvision==0.16.0+cpu
+# PyTorch (will use CPU version by default on CPU-only systems)
+torch==2.5.1
+torchvision==0.20.1
