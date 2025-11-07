@@ -1,21 +1,9 @@
-# Web Framework
-flask==3.0.0
-flask-cors==4.0.0
-gunicorn==21.2.0
-
-# Database
-pymongo==4.5.0
-
-# Image Processing
-pillow==10.4.0
-
-# ML/Data Science
-numpy>=1.24.0,<2.0.0
-transformers==4.44.0
-
-# Additional dependencies
-python-dotenv==1.0.0
-
-# PyTorch (will use CPU version by default on CPU-only systems)
-torch==2.5.1
-torchvision==0.20.1
+torch
+torchvision
+transformers
+flask
+flask-cors
+pymongo
+pillow
+numpy
+gunicorn
