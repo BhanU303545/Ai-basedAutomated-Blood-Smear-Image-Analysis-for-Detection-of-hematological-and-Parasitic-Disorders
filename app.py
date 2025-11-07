@@ -93,7 +93,7 @@ class BloodSmearAnalyzer:
         except Exception as e:
             return {'error': str(e), 'status': 'error'}
 
-analyzer = BloodSmearAnalyzer('models/best_model.pth')
+analyzer = BloodSmearAnalyzer('backend/models/best_model.pth')
 
 @app.route('/api/register', methods=['POST'])
 def register():
